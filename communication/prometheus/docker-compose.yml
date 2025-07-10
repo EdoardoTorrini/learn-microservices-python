@@ -1,0 +1,57 @@
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      prometheus-net:
+    restart: unless-stopped
+
+  stress_test_1:
+    build: 
+      context: .
+    image: my_fastapi_stress_image
+    container_name: stress_test_1
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+    networks:
+      prometheus-net:
+        ipv4_address: 172.20.1.10
+
+  stress_test_2:
+    build:
+      context: .
+    image: my_fastapi_stress_image
+    container_name: stress_test_2
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+    networks:
+      prometheus-net:
+        ipv4_address: 172.20.1.11
+
+  nginx:
+    image: openresty/openresty:alpine
+    container_name: nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro
+    networks:
+      - prometheus-net
+      - default
+    depends_on:
+      - stress_test_1
+      - stress_test_2
+
+networks:
+  prometheus-net:
+    name: prometheus-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24

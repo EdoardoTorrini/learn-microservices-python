@@ -1,0 +1,77 @@
+services:
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.13.7-management-alpine
+    ports:
+      - 5672:5672
+      - 15672:15672 # è per quello collegarsi alla dashboard
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=pwd
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      rabbitmq-net:
+        ipv4_address: 172.20.2.2
+
+  rabbitmq-common:
+    image: rabbitmq-common    
+    build:
+      context: .
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=pwd
+      - RABBITMQ_IP=172.20.2.2
+      - RABBITMQ_PORT=5672
+    entrypoint: ["echo", "Service foo disabled"]
+
+  consumer-service:
+    image: rabbitmq-basic-consumer
+    build:
+      context: consumer-service
+    depends_on:
+      rabbitmq-common:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=pwd
+      - RABBITMQ_IP=172.20.2.2
+      - RABBITMQ_PORT=5672
+    networks:
+      rabbitmq-net:
+        ipv4_address: 172.20.2.3
+
+  producer-service:
+    image: rabbitmq-basic-producer
+    build:
+      context: producer-service
+    depends_on:
+      rabbitmq-common:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=pwd
+      - RABBITMQ_IP=172.20.2.2
+      - RABBITMQ_PORT=5672
+      - HOST=0.0.0.0
+      - PORT=8080
+    ports:
+      - 8080:8080
+    networks:
+      rabbitmq-net:
+        ipv4_address: 172.20.2.4
+
+networks:
+  rabbitmq-net:
+    name: rabbitmq-net
+    ipam:
+      config:
+          - subnet: 172.20.2.0/24

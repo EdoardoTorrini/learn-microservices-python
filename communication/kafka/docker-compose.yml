@@ -1,0 +1,97 @@
+services:
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      kafka-net:
+        ipv4_address: 172.20.3.2
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.4
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      kafka-net:
+        ipv4_address: 172.20.3.3
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "Local Kafka"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9092"
+      KAFKA_CLUSTERS_0_ZOOKEEPER: "zookeeper:2181"
+    networks:
+      kafka-net:
+        ipv4_address: 172.20.3.4
+
+  producer-kafka:
+    build:
+      context: ./producer
+    image: producer-kafka
+    container_name: producer_kafka
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      - KAFKA_HOST=kafka
+      - KAFKA_PORT=9092
+      - KAFKA_TOPIC=new_event
+    networks:
+      kafka-net:
+        ipv4_address: 172.20.3.5
+
+  consumer-kafka:
+    build:
+      context: ./consumer
+    image: consumer-kafka
+    container_name: consumer_kafka
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      - KAFKA_HOST=kafka
+      - KAFKA_PORT=9092
+      - KAFKA_TOPIC=new_event
+    networks:
+      kafka-net:
+        ipv4_address: 172.20.3.6
+
+  ubuntu-test:
+    image: ubuntu:rolling
+    volumes:
+      - ./test_script:/root/test_script
+    networks:
+      kafka-net:
+        ipv4_address: 172.20.3.7
+    entrypoint: ["/bin/bash", "-c", "tail -f /dev/null"]  
+
+
+networks:
+  kafka-net:
+    name: kafka-net
+    ipam:
+      config:
+          - subnet: 172.20.3.0/24
