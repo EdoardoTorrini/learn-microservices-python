@@ -1,0 +1,102 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_server
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: db
+    volumes:
+      - ./mysql:/docker-entrypoint-initdb.d
+    networks:
+      services-routing-net:
+        ipv4_address: 172.20.5.2
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -uroot -padmin -e 'SELECT * FROM db.init_complete LIMIT 1;' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  comment-service:
+    build:
+      context: ./comment_service
+    container_name: comment_service
+    environment:
+      DB_HOST: 172.20.5.2
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: admin
+      HOST: 0.0.0.0
+      PORT: 80
+    networks:
+      services-routing-net:
+        ipv4_address: 172.20.5.3
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  post-service:
+    build:
+      context: ./post_service
+    container_name: post_service
+    environment:
+      DB_HOST: 172.20.5.2
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: admin
+      HOST: 0.0.0.0
+      PORT: 80
+    networks:
+      services-routing-net:
+        ipv4_address: 172.20.5.4
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  user-service:
+    build:
+      context: ./user_service
+    container_name: user_service
+    environment:
+      DB_HOST: 172.20.5.2
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: admin
+      HOST: 0.0.0.0
+      PORT: 80
+    networks:
+      services-routing-net:
+        ipv4_address: 172.20.5.5
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  bff-service:
+    build:
+      context: ./bff_service
+    container_name: bff_service
+    environment:
+      USERSERVICE_HOST: 172.20.5.5
+      USERSERVICE_PORT: 80
+      POSTSERVICE_HOST: 172.20.5.4
+      POSTSERVICE_PORT: 80
+      COMMENTSERVICE_HOST: 172.20.5.3
+      COMMENTSERVICE_PORT: 80
+      HOST: 0.0.0.0
+      PORT: 80
+    ports:
+      - "8000:80"
+    networks:
+      services-routing-net:
+        ipv4_address: 172.20.5.6
+    depends_on:
+      mysql:
+        condition: service_healthy 
+
+networks:
+  services-routing-net:
+    name: services-routing-net
+    ipam:
+      config:
+          - subnet: 172.20.5.0/24
