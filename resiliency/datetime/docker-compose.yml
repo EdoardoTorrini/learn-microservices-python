@@ -39,6 +39,18 @@ services:
       datetime-resiliency:
         ipv4_address: 172.20.6.10
 
+  dt_composite:
+    build:
+      context: dt_composite/
+    container_name: dt_composite_1
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - IP_TIME=172.20.6.10
+      - PORT_TIME=8000
+    networks:
+      datetime-resiliency:
+        ipv4_address: 172.20.6.11
 
 networks:
   datetime-resiliency:

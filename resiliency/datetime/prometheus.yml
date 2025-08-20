@@ -10,5 +10,6 @@ scrape_configs:
     static_configs:
       - targets:
           - 172.20.6.10:8000
+          - 172.20.6.11:8000
 
 # rate(process_cpu_seconds_total{job="stress_test"}[1m])
