@@ -1,0 +1,47 @@
+version: "3.9"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports: ["5672:5672", "15672:15672"]
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  db:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: order_db
+    ports: ["5432:5432"]
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d
+
+  order_service:
+    build: ./order_service
+    env_file: .env
+    environment:
+      SERVICE_NAME: order_service
+    depends_on: [db, rabbitmq]
+    ports: ["8001:8000"]
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+  payment_service:
+    build: ./payment_service
+    env_file: .env
+    environment:
+      SERVICE_NAME: payment_service
+    depends_on: [db, rabbitmq]
+    ports: ["8002:8000"]
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+  inventory_service:
+    build: ./inventory_service
+    env_file: .env
+    environment:
+      SERVICE_NAME: inventory_service
+    depends_on: [db, rabbitmq]
+    ports: ["8003:8000"]
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
