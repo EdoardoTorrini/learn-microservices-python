@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from controller.time import get_time_route
+from controller.date import get_date_route
+from controller.noise import get_noise_route
 
 import os, uvicorn
 
@@ -16,6 +18,8 @@ app.add_middleware(
 Instrumentator().instrument(app).expose(app)
 
 app.include_router(get_time_route())
+app.include_router(get_date_route())
+app.include_router(get_noise_route())
 
 ip = os.getenv("HOST", "127.0.0.1")
 port = int(os.getenv("PORT", "8080"))

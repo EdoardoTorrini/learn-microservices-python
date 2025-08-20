@@ -28,6 +28,18 @@ services:
       timeout: 5s
       retries: 20
 
+  sim_noise:
+    build: 
+      context: sim_error/
+    container_name: sim_noise_1
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+    networks:
+      datetime-resiliency:
+        ipv4_address: 172.20.6.10
+
+
 networks:
   datetime-resiliency:
     name: datetime-resiliency

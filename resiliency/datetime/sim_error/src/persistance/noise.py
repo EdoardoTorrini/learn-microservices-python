@@ -18,7 +18,7 @@ class Noise:
         return choice(fault + ok)
 
     def set_fault(self, fault: int):
-        if 0 < fault < 100:
+        if not 0 < fault < 100:
             raise Exception("fault val must be between 0 and 100")
         self._fault = fault
 
