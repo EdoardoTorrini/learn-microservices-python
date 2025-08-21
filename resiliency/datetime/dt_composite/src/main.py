@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from controller.time import get_time_route
+from controller.date import get_date_route
 
 from utils.config import Config
 
@@ -16,6 +17,7 @@ app.add_middleware(
 
 Instrumentator().instrument(app).expose(app)
 app.include_router(get_time_route())
+app.include_router(get_date_route())
 
 if __name__ == "__main__":
     uvicorn.run(app, host=Config.ip, port=Config.port)
