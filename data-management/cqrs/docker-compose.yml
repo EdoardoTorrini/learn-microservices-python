@@ -66,6 +66,24 @@ services:
     ports:
       - "9001:9001"
 
+  inventory-service:
+    build: ./inventory-service
+    container_name: inventory-service
+    restart: unless-stopped
+    environment:
+      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/"
+      DATABASE_URL: "mysql+pymysql://root:admin@mysql_cqrs:3306/db"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      data-management-cqrs:
+        ipv4_address: 172.20.8.13
+    ports:
+      - "9002:9002"
+
 networks:
   data-management-cqrs:
     name: data-management-cqrs

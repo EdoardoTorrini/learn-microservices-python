@@ -23,7 +23,7 @@ app.include_router(get_order_route())
 
 db_session = next(get_db())
 repo = OrderRepository(db_session)
-order_service = OrderService(repo=repo)
+order_service = OrderService()
 #event_sender = EventSender()
 receiver = EventReceiver(order_service)
 
