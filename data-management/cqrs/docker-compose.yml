@@ -31,24 +31,6 @@ services:
       timeout: 5s
       retries: 20
 
-  inventory-service:
-    build: ./inventory_service
-    container_name: inventory_service
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: "mysql+pymysql://root:admin@mysql_cqrs:3306/db"
-      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/"
-    depends_on:
-      mysql:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_started
-    networks:
-      data-management-cqrs:
-        ipv4_address: 172.20.8.10
-    ports:
-      - "8080:8080"
-
   order-service:
     build: ./order-service
     container_name: order-service

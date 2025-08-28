@@ -4,7 +4,7 @@ import os
 
 class EventSender:
     def __init__(self):
-        url = os.getenv("RABBITMQ_URL", "amqp://admin:admin@localhost:5672/")
+        url = os.getenv("RABBITMQ_URL", "amqp://admin:admin@rabbitmq_cqrs:5672/")
         self.connection = pika.BlockingConnection(pika.URLParameters(url))
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="order-payment-queue", durable=True)
