@@ -21,11 +21,9 @@ Instrumentator().instrument(app).expose(app)
 app.include_router(get_order_route())
 
 
-db_session = next(get_db())
-repo = OrderRepository(db_session)
-order_service = OrderService()
-#event_sender = EventSender()
-receiver = EventReceiver(order_service)
+sender = EventSender()
+order_service = OrderService(event_sender=sender)
+receiver = EventReceiver(order_service=order_service, event_sender=sender)
 
 def start_receiver():
     receiver.start()

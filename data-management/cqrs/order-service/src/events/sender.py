@@ -8,6 +8,7 @@ class EventSender:
         self.connection = pika.BlockingConnection(pika.URLParameters(url))
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="order-payment-queue", durable=True)
+        self.channel.queue_declare(queue="order-confirmed-queue", durable=True)
         
     def send(self, exchange: str, routing_key: str, event: Event):
         self.channel.basic_publish(
