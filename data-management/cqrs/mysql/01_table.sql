@@ -17,3 +17,14 @@ CREATE TABLE `orders` (
     credit_card_number VARCHAR(20),
     status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING'
 );
+
+DROP TABLE IF EXISTS `orders_read`;
+
+CREATE TABLE orders_read (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    customer_id VARCHAR(50) NOT NULL,
+    month INT NOT NULL,
+    year INT NOT NULL,
+    n INT DEFAULT 0,
+    UNIQUE KEY uq_customer_month_year (customer_id, month, year)
+);

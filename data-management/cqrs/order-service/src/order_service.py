@@ -37,5 +37,5 @@ class OrderService:
                 repo.save(db_order)
                 print(f"Inventory valid → Order {order_id} APPROVED", flush=True)
             
-                event = Event(key="order.confirmed", data={"orderId": order_id, "status": db_order.status.value})
+                event = Event(key="order.confirmed", data={"orderId": order_id, "customerId": db_order.customer_id, "status": db_order.status.value})
                 self.event_sender.send("", "order-confirmed-queue", event)

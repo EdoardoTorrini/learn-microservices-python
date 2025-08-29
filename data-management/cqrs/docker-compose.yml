@@ -37,7 +37,7 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: "mysql+pymysql://root:admin@mysql_cqrs:3306/db"
-      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/"
+      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/?heartbeat=300"
     depends_on:
       mysql:
         condition: service_healthy
@@ -54,7 +54,7 @@ services:
     container_name: payment-service
     restart: unless-stopped
     environment:
-      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/"
+      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/?heartbeat=300"
     depends_on:
       mysql:
         condition: service_healthy
@@ -71,7 +71,7 @@ services:
     container_name: inventory-service
     restart: unless-stopped
     environment:
-      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/"
+      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/?heartbeat=300"
       DATABASE_URL: "mysql+pymysql://root:admin@mysql_cqrs:3306/db"
     depends_on:
       mysql:
@@ -83,6 +83,24 @@ services:
         ipv4_address: 172.20.8.13
     ports:
       - "9002:9002"
+
+  read-order-service:
+    build: ./read-order-service
+    container_name: read-order-service
+    restart: unless-stopped
+    environment:
+      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/?heartbeat=300"
+      DATABASE_URL: "mysql+pymysql://root:admin@mysql_cqrs:3306/db"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      data-management-cqrs:
+        ipv4_address: 172.20.8.14
+    ports:
+      - "9003:9003"
 
 networks:
   data-management-cqrs:

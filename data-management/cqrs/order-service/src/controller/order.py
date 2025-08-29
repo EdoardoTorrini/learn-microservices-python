@@ -46,7 +46,7 @@ class OrderView:
             "customerId": saved_order.customer_id,
             "creditCardNumber": saved_order.credit_card_number,
             "status": saved_order.status.value
-        }, status_code=201)
+        }, status_code=status.HTTP_201_CREATED)
 
 def get_order_route() -> APIRouter:
   return route
