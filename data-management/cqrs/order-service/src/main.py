@@ -30,14 +30,6 @@ def start_receiver():
 
 ip = os.getenv("HOST", "0.0.0.0")
 port = int(os.getenv("PORT", "9000"))
-'''
-curl -X POST http://localhost:9000/order \
- -H "Content-Type: application/json" \
- -d '{
-   "productIds": ["PROD-A1", "PROD-D4"],
-   "creditCardNumber": "7777-1234-5678-0000"
- }'
-'''
 
 if __name__ == "__main__":
     t = Thread(target=start_receiver, daemon=True)

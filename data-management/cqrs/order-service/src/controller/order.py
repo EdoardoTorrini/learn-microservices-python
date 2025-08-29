@@ -20,7 +20,7 @@ class OrderView:
     body = await request.json()
 
     order = Order(order_id=str(uuid.uuid4()), 
-                  customer_id=str(uuid.uuid4()), 
+                  customer_id=body.get("customerId", str(uuid.uuid4())) ,
                   product_ids=",".join(body.get("productIds", [])), 
                   credit_card_number=body.get("creditCardNumber"), 
                   status=OrderStatus.PENDING)

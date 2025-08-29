@@ -24,9 +24,9 @@ ip = os.getenv("HOST", "0.0.0.0")
 port = int(os.getenv("PORT", "9003"))
 
 '''
-curl -X POST http://172.20.8.11:9000/order  -H "Content-Type: application/json"  -d '{"productIds": ["PROD-A1", "PROD-D4"], "creditCardNumber": "7777-1234-5678-0000"}'
+curl -X POST http://172.20.8.11:9000/order  -H "Content-Type: application/json"  -d '{"customerId": "user", "productIds": ["PROD-A1", "PROD-D4"], "creditCardNumber": "7777-1234-5678-0000"}'
 
-curl -X GET "http://172.20.8.14:9003/order?customerId=C-001&year=2025&month=4" -H "Accept: application/json"
+curl -X GET "http://172.20.8.14:9003/order?customerId=user&year=2025&month=8" -H "Accept: application/json"
 '''
 
 if __name__ == "__main__":
