@@ -1,9 +1,13 @@
-name: prova
-
 networks:
-  conductor_net:
-    name: prova_conductor_net
+  saga-orchestration-net:
+    name: saga-orchestration-net
     driver: bridge
+    ipam:
+        config:
+          - subnet: 172.20.1.0/24
+  
+
+  
 
 volumes:
   conductor_data: {}
@@ -13,14 +17,20 @@ services:
   conductor:
     image: conductoross/conductor-standalone:3.15.0
     container_name: conductor
+
     ports:
       - "8080:8080"   # API
       - "5000:5000"   # UI
-    networks: [conductor_net]
-    restart: unless-stopped
+
+    networks:
+      saga-orchestration-net:
+        ipv4_address: 172.20.1.11
+
     volumes:
       - conductor_data:/app/data
       - conductor_logs:/app/logs
+    
+    restart: unless-stopped 
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -28,8 +38,24 @@ services:
       retries: 10
       start_period: 20s
 
-  inventory:
+  # order:
+  #   build: order-service
 
-  order:
+  #   ports:
+  #     - "9000:9000"
+  #   networks:
+  #     saga-orchestration-net:
+  #       ipv4_address: 172.20.1.12
 
-  payment:
+  #   environment:
+  #     - CONDUCTOR_SERVER_URL=${CONDUCTOR_SERVER_URL}
+
+  #   healthcheck:
+  #     test: [ "CMD-SHELL", "curl -f http://localhost:9000/actuator/health" ]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # inventory:
+
+  # payment:
