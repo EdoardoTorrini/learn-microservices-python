@@ -1,7 +1,0 @@
-fastapi
-uvicorn[standard]
-pydantic
-pydantic-settings
-aio-pika
-SQLAlchemy>=2.0
-asyncpg

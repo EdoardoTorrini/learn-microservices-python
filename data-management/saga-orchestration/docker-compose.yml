@@ -1,0 +1,35 @@
+name: prova
+
+networks:
+  conductor_net:
+    name: prova_conductor_net
+    driver: bridge
+
+volumes:
+  conductor_data: {}
+  conductor_logs: {}
+
+services:
+  conductor:
+    image: conductoross/conductor-standalone:3.15.0
+    container_name: conductor
+    ports:
+      - "8080:8080"   # API
+      - "5000:5000"   # UI
+    networks: [conductor_net]
+    restart: unless-stopped
+    volumes:
+      - conductor_data:/app/data
+      - conductor_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
+  inventory:
+
+  order:
+
+  payment:
