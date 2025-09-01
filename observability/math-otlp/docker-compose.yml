@@ -1,7 +1,7 @@
 services:
-  math-service:
+  math-service-1:
     build: ./math-service
-    container_name: math-service
+    container_name: math-service-1
     restart: unless-stopped
     environment:
       - HOST=0.0.0.0
@@ -9,6 +9,28 @@ services:
     networks:
       observability-math-otlp:
         ipv4_address: 172.20.7.10
+
+  math-service-2:
+    build: ./math-service
+    container_name: math-service-2
+    restart: unless-stopped
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+    networks:
+      observability-math-otlp:
+        ipv4_address: 172.20.7.11
+
+  gateway-service:
+    build: ./gateway-service
+    container_name: gateway-service
+    restart: unless-stopped
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+    networks:
+      observability-math-otlp:
+        ipv4_address: 172.20.7.12
 
 networks:
   observability-math-otlp:
