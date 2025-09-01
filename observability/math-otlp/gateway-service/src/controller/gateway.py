@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi_class import View
 import itertools
 from cb.circuitbreaker import get_divisors
+from utils.redis_cache import get_from_cache, set_to_cache
 
 route = APIRouter()
 
@@ -22,8 +23,16 @@ class GatewayView:
         url = next(service_cycle)
         print(f"Forwarding GetPrimeDivisors({n} - {times}) to {url}", flush=True)
 
+        cache_key = f"divisors:{n}:{times}:{faults}"
+
+        cached = get_from_cache(cache_key)
+        if cached:
+            print(f"Cache hit for {cache_key}", flush=True)
+            return JSONResponse(content=cached, status_code=status.HTTP_200_OK, headers=response.headers)
         try:
             result = get_divisors(n=n, times=times, faults=faults, url=url)
+            if result.get("state") == "DEFAULT":
+                set_to_cache(cache_key, result)
             return JSONResponse(content=result, status_code=status.HTTP_200_OK, headers=response.headers)
         except Exception as e:
             raise HTTPException(status_code=503, detail=f"Service unavailable: {e}")
