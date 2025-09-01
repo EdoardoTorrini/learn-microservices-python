@@ -2,9 +2,10 @@ from fastapi import APIRouter, status, Response, Request, Query, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi_class import View
 import itertools
-import httpx
+from cb.circuitbreaker import get_divisors
 
 route = APIRouter()
+
 MATH_SERVICES = ["http://math-service-1:8080/divisors",
                  "http://math-service-2:8080/divisors"]
 
@@ -19,18 +20,13 @@ class GatewayView:
                   faults: int = Query(0, ge=0, le=100)):
         
         url = next(service_cycle)
-        params = {"n": n, "times": times, "faults": faults}
-        print(f"Forwarding GetPrimeDivisors({n} - {times}) to {url}")
+        print(f"Forwarding GetPrimeDivisors({n} - {times}) to {url}", flush=True)
 
         try:
-            async with httpx.AsyncClient() as client:
-                res = await client.get(url, params=params)
-                res.raise_for_status()
-                return res.json()
-        except httpx.RequestError as e:
+            result = get_divisors(n=n, times=times, faults=faults, url=url)
+            return JSONResponse(content=result, status_code=status.HTTP_200_OK, headers=response.headers)
+        except Exception as e:
             raise HTTPException(status_code=503, detail=f"Service unavailable: {e}")
-        except httpx.HTTPStatusError as e:
-            raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
 
     
 
