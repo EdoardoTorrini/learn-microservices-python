@@ -22,7 +22,7 @@ otlp_exporter = OTLPSpanExporter(endpoint="http://tempo:4317", insecure=True)
 span_processor = BatchSpanProcessor(otlp_exporter)
 trace.get_tracer_provider().add_span_processor(span_processor)
 
-LoggingInstrumentor(log_level=logging.ERROR).instrument(set_logging_format=True)
+LoggingInstrumentor().instrument(set_logging_format=True)
 
 app = FastAPI()
 app.add_middleware(
