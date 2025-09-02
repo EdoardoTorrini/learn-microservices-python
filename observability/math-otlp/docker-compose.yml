@@ -1,5 +1,4 @@
 services:
-
   redis:
     image: redis:latest
     container_name: redis
@@ -9,6 +8,47 @@ services:
       observability-math-otlp:
         ipv4_address: 172.20.7.2
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      observability-math-otlp:
+        ipv4_address: 172.20.7.3
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    networks:
+      observability-math-otlp:
+        ipv4_address: 172.20.7.4
+  
+  tempo:
+    image: grafana/tempo:2.0.0
+    container_name: tempo
+    ports:
+      - "4317:4317"
+    networks:
+      observability-math-otlp:
+        ipv4_address: 172.20.7.5
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+    environment:
+      - GF_LOG_LEVEL=error
+    networks:
+      observability-math-otlp:
+        ipv4_address: 172.20.7.6
 
   math-service-1:
     build: ./math-service
@@ -17,6 +57,8 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=8080
+    ports:
+      - 8081:8080
     networks:
       observability-math-otlp:
         ipv4_address: 172.20.7.10
@@ -28,6 +70,8 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=8080
+    ports:
+      - 8082:8080
     networks:
       observability-math-otlp:
         ipv4_address: 172.20.7.11
@@ -41,6 +85,8 @@ services:
       - PORT=8080
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    ports:
+      - 8080:8080
     networks:
       observability-math-otlp:
         ipv4_address: 172.20.7.12

@@ -234,3 +234,6 @@ bundles/
 vendor/pkg/
 pyenv
 Vagrantfile
+
+# Grafana local data
+observability/math-otlp/grafana-data/
