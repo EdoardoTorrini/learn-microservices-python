@@ -1,5 +1,5 @@
 {
-  "name": "order-saga",
+  "name": "order_saga_orchestration",
   "description": "This SAGA places an order",
   "version": 1,
   "schemaVersion": 2,

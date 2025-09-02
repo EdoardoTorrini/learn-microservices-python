@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 from fastapi_class import View
 
 from order.dto import OrderDTO
+from utils.config import get_db
+from order.flow import start_order_flow
 
 
 router = APIRouter()
@@ -15,7 +17,8 @@ class OrderController:
 
     async def post(self, order: OrderDTO):
         print(order)
-        return status.HTTP_204_NO_CONTENT
+        out = start_order_flow(order)
+        return {"workflowId": out["workflowId"]}, status.HTTP_202_ACCEPTED
 
 
 def get_order_view():

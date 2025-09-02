@@ -1,0 +1,7 @@
+curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'   -d '{
+    "order_id":"11111111-2222-3333-4444-555555555555",
+    "product_ids":"123,456",
+    "customer_id":"c-789",
+    "credit_card_number":"4111111111111111",
+    "status":"PENDING"
+  }'

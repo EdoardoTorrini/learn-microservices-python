@@ -1,11 +1,3 @@
-networks:
-  saga-orchestration-net:
-    name: saga-orchestration-net
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.9.0/24
-
 services:
   conductor:
     image: conductoross/conductor-standalone:3.15.0
@@ -15,10 +7,9 @@ services:
     #   - "5000:5000"   # UI
     networks:
       saga-orchestration-net:
-        ipv4_address: 172.20.9.4
+        ipv4_address: 172.20.9.2
     volumes:
       - conductor_data:/app/data
-      - conductor_logs:/app/logs
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
@@ -48,20 +39,41 @@ services:
   order-service:
     build: ./order-service
     container_name: order-service
+    environment:
+      CONDUCTOR_SERVER_URL: http://conductor:8080/api
+      ORDER_WORKER_DOMAIN: ""
     depends_on:
       conductor:
         condition: service_healthy
       mysql:
         condition: service_healthy
-    env_file:
-      - ./order-service/.env
     networks:
       saga-orchestration-net:
         ipv4_address: 172.20.9.11
-    healthcheck:
-      test: ["CMD", "wget", "http://localhost:9000/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 15s
     restart: unless-stopped
+
+  order-worker:
+    build: ./order-service
+    command: /usr/bin/python /app/run_workers.py
+    environment:
+      CONDUCTOR_SERVER_URL: http://conductor:8080/api
+      ORDER_WORKER_DOMAIN: ""
+    depends_on:
+      conductor: 
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      saga-orchestration-net:
+        ipv4_address: 172.20.9.12
+    restart: unless-stopped
+
+networks:
+  saga-orchestration-net:
+    name: saga-orchestration-net
+    # driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.9.0/24
+volumes:
+  conductor_data:
