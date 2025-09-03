@@ -54,10 +54,16 @@ services:
 
   order-worker:
     build: ./order-service
+    container_name: order-worker
     command: /usr/bin/python /app/run_workers.py
     environment:
       CONDUCTOR_SERVER_URL: http://conductor:8080/api
       ORDER_WORKER_DOMAIN: ""
+      DB_HOST: mysql_saga_orchestration
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: admin
+      DB_NAME: db
     depends_on:
       conductor: 
         condition: service_healthy

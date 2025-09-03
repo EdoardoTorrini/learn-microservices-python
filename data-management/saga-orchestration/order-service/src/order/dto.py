@@ -8,12 +8,12 @@ class OrderStatus(str, Enum):
     REJECTED = "REJECTED"
 
 class OrderDTO(BaseModel):
-    order_id: str | None = None
-    product_ids: str
-    customer_id: str
-    credit_card_number: str
+    orderId: str | None = None
+    productIds: str
+    customerId: str
+    creditCardNumber: str
     status: OrderStatus = OrderStatus.PENDING
 
     def __repr__(self):
-        return (f"{self.order_id}: products_ids: {self.product_ids}, customer_id: {self.customer_id}, "
-                f"credit_card: {self.credit_card_number}, status: {self.status}")
+        return (f"{self.orderId}: productsIds: {self.productIds}, customerId: {self.customerId}, "
+                f"creditCardNumber: {self.creditCardNumber}, status: {self.status}")

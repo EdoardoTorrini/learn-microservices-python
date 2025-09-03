@@ -4,7 +4,7 @@ from fastapi_class import View
 
 from order.dto import OrderDTO
 from utils.config import get_db
-from order.flow import start_order_flow
+from order.workers import start_order_flow
 
 
 router = APIRouter()

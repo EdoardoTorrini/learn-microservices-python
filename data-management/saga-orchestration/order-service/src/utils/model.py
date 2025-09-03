@@ -13,16 +13,16 @@ class Order(Config.base):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    order_id = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
-    product_ids = Column(String(length=1024), nullable=True)
-    customer_id = Column(String(length=255), nullable=True)     # <-- fix qui
-    credit_card_number = Column(String(length=64), nullable=True)
+    orderId = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
+    productIds = Column(String(length=1024), nullable=True)
+    customerId = Column(String(length=255), nullable=True)     # <-- fix qui
+    creditCardNumber = Column(String(length=64), nullable=True)
     status = Column(SqlEnum(OrderStatus, name="order_status"), nullable=False, default=OrderStatus.PENDING)
 
-    def __init__(self, product_ids: str, customer_id: str, credit_card_number: str):
-        self.product_ids = product_ids
-        self.customer_id = customer_id
-        self.credit_card_number = credit_card_number
+    def __init__(self, productIds: str, customerId: str, creditCardNumber: str):
+        self.productIds = productIds
+        self.customerId = customerId
+        self.creditCardNumber = creditCardNumber
 
     def __repr__(self):
         return f"<Order {self.order_id} status={self.status}>"

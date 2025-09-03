@@ -11,10 +11,11 @@ class OrderService:
         self.db = db
 
     def place_pending_order(self, order: Order):
-        logger.info("persisting %s...", order.order_id)
+        logger.info("persisting %s...", order.orderId)
+        # print(f"service.py: orderId: {order.orderId}, productIds: {order.productIds}, customerId: {order.customerId}, creditCardNumber: {order.creditCardNumber}, status: {order.status}",flush=True)
         existing = (
             self.db.query(Order)
-            .filter(Order.order_id == order.order_id)
+            .filter(Order.orderId == order.orderId)
             .first()
         )
         if not existing:
@@ -22,11 +23,11 @@ class OrderService:
             self.db.commit()
             self.db.refresh(order)
 
-    def delete_pending_order(self, order_id: str):
-        logger.info("rejecting %s...", order_id)
+    def delete_pending_order(self, orderId: str):
+        logger.info("rejecting %s...", orderId)
         existing = (
             self.db.query(Order)
-            .filter(Order.order_id == order_id)
+            .filter(Order.order_id == orderId)
             .first()
         )
         if existing:
@@ -34,11 +35,11 @@ class OrderService:
             self.db.commit()
             self.db.refresh(existing)
 
-    def confirm_pending_order(self, order_id: str):
-        logger.info("confirming %s...", order_id)
+    def confirm_pending_order(self, orderId: str):
+        logger.info("confirming %s...", orderId)
         existing = (
             self.db.query(Order)
-            .filter(Order.order_id == order_id)
+            .filter(Order.order_id == orderId)
             .first()
         )
         if existing:
