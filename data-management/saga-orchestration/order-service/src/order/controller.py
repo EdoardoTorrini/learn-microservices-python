@@ -1,23 +1,20 @@
-from fastapi import APIRouter, status, routing, Depends
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, status
 from fastapi_class import View
 
-from order.dto import OrderDTO
-from utils.config import get_db
-from order.workers import start_order_flow
-
+from dto.fastapi.dto import OrderIn
+import order.workers as workers
 
 router = APIRouter()
 
 @View(router, path="/order")
 class OrderController:
 
-    async def get(self):
-        pass
+    orderWorkers = workers.OrderWorkers()
 
-    async def post(self, order: OrderDTO):
+
+    async def post(self, order: OrderIn):
         print(order)
-        out = start_order_flow(order)
+        out = self.orderWorkers.startOrderFlow(order)
         return {"workflowId": out["workflowId"]}, status.HTTP_202_ACCEPTED
 
 
