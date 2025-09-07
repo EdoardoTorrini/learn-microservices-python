@@ -5,8 +5,9 @@ import time
 
 from enum import Enum
 
-from utils.model import Order, OrderStatus
+from order.model import Order, OrderStatus
 from order.service import OrderService
+from dto.dto import OrderDTO
 
 from conductor.client.configuration.configuration import Configuration
 from conductor.client.automator.task_handler import TaskHandler
@@ -23,7 +24,7 @@ def persist_pending_order_worker(orderId: str = "",
                                  productIds: str = "",
                                  customerId: str = "",
                                  creditCardNumber: str = "",
-                                 status: str = OrderStatus.PENDING.value): # TODO: check dato che status è un enum non lo posso passare cosi com'è a conductor
+                                 status: str = ""): 
     
     entity = Order(
         productIds = productIds,
@@ -31,12 +32,7 @@ def persist_pending_order_worker(orderId: str = "",
         creditCardNumber = creditCardNumber
     )
     if status:
-        try:
-            entity.status = OrderStatus(status)          # per valori "PENDING"
-        except ValueError:
-            # tollera anche "OrderStatus.PENDING" o un nome
-            name = status.split(".")[-1]
-            entity.status = OrderStatus[name]
+        entity.status = OrderStatus(status)
     if orderId:
         entity.orderId = orderId
     
@@ -96,8 +92,7 @@ class OrderWorkers:
             self.task_handler.stop_processes()
 
     # ------- Metodo pubblico per avviare un workflow -------
-    def startOrderFlow(self, order: Order) -> str:
-        status_val = order.status.value if isinstance(order.status, Enum) else order.status # TODO: check dato che status è un enum non lo posso passare cosi com'è a conductor
+    def startOrderFlow(self, order: OrderDTO) -> str:
         run = self.workflow_executor.execute(
             name = "order_saga_orchestration",
             version = 1,
@@ -106,7 +101,7 @@ class OrderWorkers:
                 "productIds": order.productIds,
                 "customerId": order.customerId,
                 "creditCardNumber": order.creditCardNumber,
-                "status": status_val # TODO: check dato che status è un enum non lo posso passare cosi com'è a conductor
+                "status": order.status
             }
         )
 

@@ -4,7 +4,7 @@ from typing import Callable, Iterator
 
 from sqlalchemy.orm import Session
 
-from utils.model import Order, OrderStatus
+from order.model import Order, OrderStatus
 from utils.config import get_db
 
 logger = logging.getLogger(__name__)

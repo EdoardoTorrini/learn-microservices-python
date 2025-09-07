@@ -2,8 +2,7 @@ curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'  
     "orderId":"11111111-2222-3333-4444-555555555555",
     "productIds":"123,456",
     "customerId":"c-789",
-    "creditCardNumber":"4111111111111111",
-    "status":"PENDING"
+    "creditCardNumber":"4111111111111111"
   }'
 
 
