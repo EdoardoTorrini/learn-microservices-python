@@ -13,7 +13,6 @@ class OrderController:
 
 
     async def post(self, order: OrderDTO):
-        print(order)
         out = self.orderWorkers.startOrderFlow(order)
         return {"workflowId": out["workflowId"]}, status.HTTP_202_ACCEPTED
 

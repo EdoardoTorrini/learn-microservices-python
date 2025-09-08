@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from datetime import datetime
 from utils.config import Config
 
@@ -17,7 +17,7 @@ class Payment(Config.base):
     creditCardNumber = Column(String(64))
 
     createdAt = Column(Integer, nullable=False, default=datetime.now)
-    success = Column(bool, nullable=False, default=False)
+    success = Column(Boolean, nullable=False, default=False)
 
     def __init__(self, orderId:str, creditCardNumber:str):
         self.orderId = orderId

@@ -33,7 +33,7 @@ class OrderService:
         with self._session() as db:
             existing = (
                 db.query(Order)
-                .filter(Order.orderId == order.orderId)  # campo coerente
+                .filter(Order.orderId == order.orderId)
                 .first()
             )
             if not existing:

@@ -12,5 +12,5 @@ class PaymentController:
 
 
 
-def get_order_view():
+def get_payment_view():
     return router

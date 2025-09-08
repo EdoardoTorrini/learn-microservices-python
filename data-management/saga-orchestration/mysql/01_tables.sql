@@ -10,7 +10,23 @@ CREATE TABLE `orders` (
     customerId VARCHAR(255) NOT NULL,
     creditCardNumber VARCHAR(64) NOT NULL,
     status ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING'
-    -- INDEX idx_order_id (order_id), 
-    -- INDEX idx_product_ids (product_ids)
+);
+
+DROP TABLE IF EXISTS `payments`;
+
+CREATE TABLE `payments` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    orderId CHAR(36) NOT NULL UNIQUE,
+    creditCardNumber VARCHAR(64) NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    success BOOLEAN NOT NULL
+);
+
+DROP TABLE IF EXISTS `inventory`;
+
+CREATE TABLE `inventory` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    productId CHAR(36) NOT NULL UNIQUE,
+    quantity INT NOT NULL
 );
 

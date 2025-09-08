@@ -35,20 +35,31 @@ class PaymentService:
             orderId=order.orderId,
             creditCardNumber=order.creditCardNumber
         )
-        if self.validateCard(order.creditCardNumber):
-            payment.success = True
-            logger.info("Verified payment (valid)")
-
         with self._session() as db:
             existing = (
                 db.query(Payment)
-                .filter(Payment.orderId == payment.orderId)  # campo coerente
+                .filter(Payment.orderId == order.orderId)
                 .first()
             )
             if not existing:
-                db.add(payment)
-                db.flush()
-                db.refresh(payment)
+                if self.validateCard(order.creditCardNumber):
+                    logger.info("Verified payment (valid)")
+                    payment.success = True
+                    db.add(payment)
+                    db.flush()
+                    db.refresh(payment)
+                    return True
+                else:
+                    logger.info("Verified payment (not valid)")
+                    payment.success = False
+                    db.add(payment)
+                    db.flush()
+                    db.refresh(payment)
+                    return False
+            else:
+                logger.info("Payment already processed (orderId already in db)")
+                return False
 
+    @staticmethod
     def validateCard(creditCardNumber: str) -> bool:
         return creditCardNumber.startswith("7777")

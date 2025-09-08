@@ -17,19 +17,18 @@ logging.basicConfig(level=logging.INFO)
 
 @worker_task(task_definition_name="payment-check")
 def paymentCheck(orderId: str = "",
-                                 productIds: str = "",
-                                 customerId: str = "",
-                                 creditCardNumber: str = "",
-                                 status: str = ""): 
+                 productIds: str = "",
+                 customerId: str = "",
+                 creditCardNumber: str = "",
+                 status: str = ""): 
     
     entity = OrderDTO(
+        orderId = orderId,
         productIds = productIds,
         customerId = customerId,
-        creditCardNumber = creditCardNumber
+        creditCardNumber = creditCardNumber,
+        status = status
     )
-    entity.orderId = orderId
-    entity.status = status # TODO: status deve essere definito meglio
-
     
 
     if PaymentService().paymentCheck(entity):
