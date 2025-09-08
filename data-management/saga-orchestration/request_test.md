@@ -1,36 +1,36 @@
 
 ### to upload workflow on conductor via api
 
-  curl -X POST -H "Content-Type:application/json" http://172.20.9.2:8080/api/metadata/workflow -d @workflow.json
+    curl -X POST -H "Content-Type:application/json" http://172.20.9.2:8080/api/metadata/workflow -d @workflow.json
 
 
 
 ### order valid
 
-  curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'   -d '{
-      "orderId":"0000-1111-2222-3333-4444-5555-6666",
-      "productIds":"PROD-N14,PROD-T20",
-      "customerId":"c-789",
-      "creditCardNumber":"7777111111111111"
-    }'
+    curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'   -d '{
+        "orderId":"0000-1111-2222-3333-4444-5555-6666",
+        "productIds":"PROD-N14,PROD-T20",
+        "customerId":"c-789",
+        "creditCardNumber":"7777111111111111"
+      }'
 
 ### order invalid - no credit card
 
-  curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'   -d '{
-      "orderId":"1111-2222-3333-4444-5555-6666-7777",
-      "productIds":"PROD-N14",
-      "customerId":"c-789",
-      "creditCardNumber":"4111111111111111"
-    }'
+    curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'   -d '{
+        "orderId":"1111-2222-3333-4444-5555-6666-7777",
+        "productIds":"PROD-N14",
+        "customerId":"c-789",
+        "creditCardNumber":"4111111111111111"
+      }'
 
 ### order invalid - no product in inventory
 
-  curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'   -d '{
-      "orderId":"1111-2222-3333-4444-5555-6666-7777",
-      "productIds":"PROD-E5",
-      "customerId":"c-789",
-      "creditCardNumber":"4111111111111111"
-    }'
+    curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'   -d '{
+        "orderId":"2222-3333-4444-5555-6666-7777-8888",
+        "productIds":"PROD-E5",
+        "customerId":"c-789",
+        "creditCardNumber":"7777111111111111"
+      }'
 
 ___________
 

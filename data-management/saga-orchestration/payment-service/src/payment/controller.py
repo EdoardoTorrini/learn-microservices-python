@@ -8,7 +8,7 @@ router = APIRouter()
 @View(router, path="/payment")
 class PaymentController:
 
-    orderWorkers = workers.PaymentWorkers()
+    paymentWorkers = workers.PaymentWorkers()
 
 
 
