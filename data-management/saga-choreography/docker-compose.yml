@@ -77,25 +77,25 @@ services:
         ipv4_address: 172.20.10.12
     restart: unless-stopped
 
-  # inventory-service:
-  #   build: ./inventory-service
-  #   container_name: inventory-service
-  #   environment:
-  #     DB_HOST: mysql_saga_choreography
-  #     DB_PORT: "3306"
-  #     DB_USER: root
-  #     DB_PASSWORD: admin
-  #     DB_NAME: db
-  #     RABBITMQ_URL: "amqp://admin:admin@rabbitmq_saga_choreography:5672/?heartbeat=300"
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #     mysql:
-  #       condition: service_healthy
-  #   networks:
-  #     saga-choreography-net:
-  #       ipv4_address: 172.20.10.13
-  #   restart: unless-stopped
+  inventory-service:
+    build: ./inventory-service
+    container_name: inventory-service
+    environment:
+      DB_HOST: mysql_saga_choreography
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: admin
+      DB_NAME: db
+      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_saga_choreography:5672/?heartbeat=300"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      saga-choreography-net:
+        ipv4_address: 172.20.10.13
+    restart: unless-stopped
 
 networks:
   saga-choreography-net:

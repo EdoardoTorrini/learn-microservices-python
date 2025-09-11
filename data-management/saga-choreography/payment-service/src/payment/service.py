@@ -30,6 +30,7 @@ class PaymentService:
             db.close()
 
     def paymentCheck(self, order: OrderDTO) -> bool:
+        
         logger.info("Verifying payment %s...", getattr(order, "orderId", None))
         payment = Payment(
             orderId=order.orderId,

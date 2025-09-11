@@ -62,6 +62,7 @@ class OrderService:
                 .filter(Order.orderId == orderId)
                 .first()
             )
+            
             if existing:
                 existing.status = OrderStatus.APPROVED
                 db.flush()

@@ -1,8 +1,6 @@
 from fastapi import APIRouter
 from fastapi_class import View
 
-from events.receiver import EventReceiver
-
 router = APIRouter()
 
 @View(router, path="/payment")

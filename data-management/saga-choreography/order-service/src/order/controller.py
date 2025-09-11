@@ -1,8 +1,10 @@
 from fastapi import APIRouter, status
 from fastapi_class import View
 import logging
+import json
 
 from dto.dto import OrderDTO
+
 from order.model import Order, OrderStatus
 from order.service import OrderService
 from events.sender import EventSender
@@ -33,7 +35,7 @@ class OrderController:
         
         self.orderService.place_pending_order(order)
 
-        event = Event(key="order.created", data=orderDTO)
+        event = Event(key="order.created", data=orderDTO.model_dump())
         
         self.eventSender.send("order.created", event)
 

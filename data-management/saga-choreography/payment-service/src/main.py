@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware      
 
-import threading                                                  
+from threading import Thread                                                
 
 from utils.config import Config
 from payment.controller import get_payment_view
@@ -17,13 +17,13 @@ app.add_middleware(
 
 app.include_router(get_payment_view()) 
 
-# receiver = EventReceiver()
-
-# @app.on_event("startup")
-# def _start_consumer():
-#     t = threading.Thread(target=receiver.start_consuming, daemon=True)
-#     t.start()
-# TODO: pensa a come avviare il receiver mantenendo fastapi
+def start_event_receiver():
+    receiver = EventReceiver()
+    receiver.start_consuming()
 
 if __name__ == "__main__":
+
+    t = Thread(target=start_event_receiver, daemon=True)
+    t.start()
+
     uvicorn.run(app, host=Config.host, port=Config.port)

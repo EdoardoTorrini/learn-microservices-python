@@ -5,7 +5,7 @@ import pika
 import json
 from events.event import Event
 from events.sender import EventSender
-from payment.service import PaymentService
+from inventory.service import InventoryService
 from dto.dto import OrderDTO
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 
 class EventReceiver:
     def __init__(self):
-        self.paymentService = PaymentService()
+        self.paymentService = InventoryService()
         self.eventSender = EventSender()
 
         url = os.getenv("RABBITMQ_URL", "amqp://admin:admin@rabbitmq_cqrs:5672/")
@@ -26,7 +26,7 @@ class EventReceiver:
         self.queue_name = result.method.queue
 
         # Ascolta SOLO gli eventi che ti interessano
-        self.channel.queue_bind(exchange="app.events", queue=self.queue_name, routing_key="order.created")
+        self.channel.queue_bind(exchange="app.events", queue=self.queue_name, routing_key="payment.valid")
 
         # Consuma un messaggio per volta
         self.channel.basic_qos(prefetch_count=1)
@@ -39,27 +39,27 @@ class EventReceiver:
                 event = Event.from_json(body.decode())
                 logger.info(f"Received event: key=%s", getattr(event, "key", None))
                 
-                if event.key == "order.created":
+                if event.key == "payment.valid":
                     
                     raw = event.data
                     payload = raw if isinstance(raw, dict) else json.loads(raw)
                     order_dto = OrderDTO(**payload)
                     
-                    self.manageOrderCreated(order_dto)
+                    self.manageInventory(order_dto)
 
                 ch.basic_ack(delivery_tag=method.delivery_tag)
 
             except Exception as e:
                 logger.error("Error while processing message: %s", e, exc_info=True)
 
-        logger.info("Waiting for events on queue '%s' (binding: order.created)...", self.queue_name)
+        logger.info("Waiting for events on queue '%s' (binding: payment.valid)...", self.queue_name)
         self.channel.basic_consume(queue=self.queue_name, on_message_callback=_on_message)
 
         self.channel.start_consuming()
 
     # --- Handlers ---
-    def manageOrderCreated(self, orderDTO: OrderDTO):
-        if self.paymentService.paymentCheck(orderDTO):
-            self.eventSender.send("payment.valid", Event(key="payment.valid", data=orderDTO.model_dump()))
+    def manageInventory(self, orderDTO: OrderDTO):
+        if self.paymentService.inventoryCheck(orderDTO):
+            self.eventSender.send("inventory.valid", Event(key="inventory.valid", data=orderDTO.model_dump()))
         else:
-            self.eventSender.send("payment.invalid", Event(key="payment.invalid", data=orderDTO.model_dump()))
+            self.eventSender.send("inventory.invalid", Event(key="inventory.invalid", data=orderDTO.model_dump()))
