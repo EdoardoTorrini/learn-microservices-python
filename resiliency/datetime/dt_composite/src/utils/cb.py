@@ -32,10 +32,6 @@ def resilient(failure_threshold=3, recovery_timeout=5, retry_attempts=3, retry_w
                 else:
                     return retry_func(*args, **kwargs)
             except (RetryError, CircuitBreakerError, Exception, FuturesTimeout) as e:
-                # if isinstance(e, FuturesTimeout):
-                #     print(f"Timeout superato: {timeout}s")
-                # else:
-                #     print(f"Errore definitivo: {e}")
                 if fallback:
                     return fallback(*args, **kwargs)
                 return None

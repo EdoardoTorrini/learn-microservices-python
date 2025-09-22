@@ -17,6 +17,7 @@ flowchart TD
 In this exercise, three services collaborate to implement a **Saga Pattern** using asynchronous messaging.\
 The services are:
 - **Order service**: Accepts a POST request and create an order, starting the workflow.
+- **Read Order service**: Accepts a GET request to read completed orders.
 - **Payment service**: Validates the customer's payment.
 - **Inventory service**: Checks products availability and reserve the items for the order.
 
@@ -34,3 +35,6 @@ curl -X POST http://172.20.8.11:9000/order  -H "Content-Type: application/json" 
 curl -X GET "http://172.20.8.14:9003/order?customerId=user&year=2025&month=8" -H "Accept: application/json"
 ```
 
+```bash
+docker exec -it mysql_cqrs mysql -uroot -padmin
+```

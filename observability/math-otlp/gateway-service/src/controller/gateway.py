@@ -23,7 +23,7 @@ class GatewayView:
         url = next(service_cycle)
         print(f"Forwarding GetPrimeDivisors({n} - {times}) to {url}", flush=True)
 
-        cache_key = f"divisors:{n}:{times}:{faults}"
+        cache_key = f"divisors:{n}:{times}"
 
         cached = get_from_cache(cache_key)
         if cached:
