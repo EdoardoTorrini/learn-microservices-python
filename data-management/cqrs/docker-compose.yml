@@ -1,0 +1,110 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_cqrs
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "15672:15672"  # Management UI
+      - "5672:5672"    # AMQP port
+    networks:
+      data-management-cqrs:
+        ipv4_address: 172.20.8.4
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_cqrs
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: db
+    volumes:
+      - ./mysql:/docker-entrypoint-initdb.d
+    networks:
+      data-management-cqrs:
+        ipv4_address: 172.20.8.3
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -uroot -padmin -e 'SELECT * FROM db.init_complete LIMIT 1;' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: "mysql+pymysql://root:admin@mysql_cqrs:3306/db"
+      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/?heartbeat=300"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      data-management-cqrs:
+        ipv4_address: 172.20.8.11
+    ports:
+      - "9000:9000"
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    restart: unless-stopped
+    environment:
+      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/?heartbeat=300"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      data-management-cqrs:
+        ipv4_address: 172.20.8.12
+    ports:
+      - "9001:9001"
+
+  inventory-service:
+    build: ./inventory-service
+    container_name: inventory-service
+    restart: unless-stopped
+    environment:
+      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/?heartbeat=300"
+      DATABASE_URL: "mysql+pymysql://root:admin@mysql_cqrs:3306/db"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      data-management-cqrs:
+        ipv4_address: 172.20.8.13
+    ports:
+      - "9002:9002"
+
+  read-order-service:
+    build: ./read-order-service
+    container_name: read-order-service
+    restart: unless-stopped
+    environment:
+      RABBITMQ_URL: "amqp://admin:admin@rabbitmq_cqrs:5672/?heartbeat=300"
+      DATABASE_URL: "mysql+pymysql://root:admin@mysql_cqrs:3306/db"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      data-management-cqrs:
+        ipv4_address: 172.20.8.14
+    ports:
+      - "9003:9003"
+
+networks:
+  data-management-cqrs:
+    name: data-management-cqrs
+    ipam:
+      config:
+          - subnet: 172.20.8.0/24

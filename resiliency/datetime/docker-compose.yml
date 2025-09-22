@@ -1,0 +1,60 @@
+services:
+  
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      datetime-resiliency:
+        ipv4_address: 172.20.6.2
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_server
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: db
+    volumes:
+      - ./mysql:/docker-entrypoint-initdb.d
+    networks:
+      datetime-resiliency:
+        ipv4_address: 172.20.6.3
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -uroot -padmin -e 'SELECT * FROM db.init_complete LIMIT 1;' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  sim_noise:
+    build: 
+      context: sim_error/
+    container_name: sim_noise_1
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+    networks:
+      datetime-resiliency:
+        ipv4_address: 172.20.6.10
+
+  dt_composite:
+    build:
+      context: dt_composite/
+    container_name: dt_composite_1
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - IP_SIM=172.20.6.10
+      - PORT_SIM=8000
+    networks:
+      datetime-resiliency:
+        ipv4_address: 172.20.6.11
+
+networks:
+  datetime-resiliency:
+    name: datetime-resiliency
+    ipam:
+      config:
+          - subnet: 172.20.6.0/24

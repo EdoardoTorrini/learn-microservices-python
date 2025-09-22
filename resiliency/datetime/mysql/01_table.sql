@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS `infos`;
+
+CREATE TABLE `infos` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    month INT NOT NULL,
+    day INT NOT NULL,
+    info TEXT NOT NULL
+);
