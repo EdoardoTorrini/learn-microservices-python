@@ -1,0 +1,173 @@
+{
+  "name": "order_saga_orchestration",
+  "description": "This SAGA places an order",
+  "version": 1,
+  "schemaVersion": 2,
+  "restartable": true,
+  "enforceSchema": true,
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "inputParameters": [
+    "orderId",
+    "productIds",
+    "customerId",
+    "creditCardNumber",
+    "status"
+  ],
+  "tasks": [
+    {
+      "name": "persist-pending-order",
+      "taskReferenceName": "persist_pending",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "orderId": "${workflow.input.orderId}",
+        "productIds": "${workflow.input.productIds}",
+        "customerId": "${workflow.input.customerId}",
+        "creditCardNumber": "${workflow.input.creditCardNumber}",
+        "status": "${workflow.input.status}"
+      }
+    },
+    {
+      "name": "switch-pending-order",
+      "taskReferenceName": "switch_persist",
+      "type": "SWITCH",
+      "evaluatorType": "value-param",
+      "expression": "result",
+      "inputParameters": {
+        "result": "${persist_pending.output.result}"
+      },
+      "decisionCases": {
+        "FAIL": [
+          {
+            "name": "delete-pending-order",
+            "taskReferenceName": "delete_on_persist_fail",
+            "type": "SIMPLE",
+            "inputParameters": {
+              "orderId": "${workflow.input.orderId}",
+              "productIds": "${workflow.input.productIds}",
+              "customerId": "${workflow.input.customerId}",
+              "creditCardNumber": "${workflow.input.creditCardNumber}",
+              "status": "${workflow.input.status}"
+            }
+          },
+          {
+            "name": "terminate",
+            "taskReferenceName": "terminate_after_persist_fail",
+            "type": "TERMINATE",
+            "inputParameters": {
+              "terminationStatus": "FAILED"
+            }
+          }
+        ]
+      },
+      "defaultCase": []
+    },
+    {
+      "name": "payment-check",
+      "taskReferenceName": "payment_check",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "orderId": "${workflow.input.orderId}",
+        "productIds": "${workflow.input.productIds}",
+        "customerId": "${workflow.input.customerId}",
+        "creditCardNumber": "${workflow.input.creditCardNumber}",
+        "status": "${workflow.input.status}"
+      }
+    },
+    {
+      "name": "switch-payment",
+      "taskReferenceName": "switch_payment",
+      "type": "SWITCH",
+      "evaluatorType": "value-param",
+      "expression": "result",
+      "inputParameters": {
+        "result": "${payment_check.output.result}"
+      },
+      "decisionCases": {
+        "FAIL": [
+          {
+            "name": "delete-pending-order",
+            "taskReferenceName": "delete_on_payment_fail",
+            "type": "SIMPLE",
+            "inputParameters": {
+              "orderId": "${workflow.input.orderId}",
+              "productIds": "${workflow.input.productIds}",
+              "customerId": "${workflow.input.customerId}",
+              "creditCardNumber": "${workflow.input.creditCardNumber}",
+              "status": "${workflow.input.status}"
+            }
+          },
+          {
+            "name": "terminate",
+            "taskReferenceName": "terminate_after_payment_fail",
+            "type": "TERMINATE",
+            "inputParameters": {
+              "terminationStatus": "FAILED"
+            }
+          }
+        ]
+      },
+      "defaultCase": []
+    },
+    {
+      "name": "inventory-check",
+      "taskReferenceName": "inventory_check",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "orderId": "${workflow.input.orderId}",
+        "productIds": "${workflow.input.productIds}",
+        "customerId": "${workflow.input.customerId}",
+        "creditCardNumber": "${workflow.input.creditCardNumber}",
+        "status": "${workflow.input.status}"
+      }
+    },
+    {
+      "name": "switch-inventory",
+      "taskReferenceName": "switch_inventory",
+      "type": "SWITCH",
+      "evaluatorType": "value-param",
+      "expression": "result",
+      "inputParameters": {
+        "result": "${inventory_check.output.result}"
+      },
+      "decisionCases": {
+        "FAIL": [
+          {
+            "name": "delete-pending-order",
+            "taskReferenceName": "delete_on_inventory_fail",
+            "type": "SIMPLE",
+            "inputParameters": {
+              "orderId": "${workflow.input.orderId}",
+              "productIds": "${workflow.input.productIds}",
+              "customerId": "${workflow.input.customerId}",
+              "creditCardNumber": "${workflow.input.creditCardNumber}",
+              "status": "${workflow.input.status}"
+            }
+          },
+          {
+            "name": "terminate",
+            "taskReferenceName": "terminate_after_inventory_fail",
+            "type": "TERMINATE",
+            "inputParameters": {
+              "terminationStatus": "FAILED"
+            }
+          }
+        ]
+      },
+      "defaultCase": []
+    },
+    {
+      "name": "confirm-pending-order",
+      "taskReferenceName": "confirm_pending",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "orderId": "${workflow.input.orderId}",
+        "productIds": "${workflow.input.productIds}",
+        "customerId": "${workflow.input.customerId}",
+        "creditCardNumber": "${workflow.input.creditCardNumber}",
+        "status": "${workflow.input.status}"
+      }
+    }
+  ],
+  "outputParameters": {}
+}

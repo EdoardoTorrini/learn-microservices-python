@@ -1,0 +1,61 @@
+
+### to upload workflow on conductor via api
+
+    curl -X POST -H "Content-Type:application/json" http://172.20.9.2:8080/api/metadata/workflow -d @workflow.json
+
+
+
+### order valid
+
+    curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'   -d '{
+        "orderId":"0000-1111-2222-3333-4444-5555-6666",
+        "productIds":"PROD-N14,PROD-T20",
+        "customerId":"c-789",
+        "creditCardNumber":"7777111111111111"
+      }'
+
+### order invalid - no credit card
+
+    curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'   -d '{
+        "orderId":"1111-2222-3333-4444-5555-6666-7777",
+        "productIds":"PROD-N14",
+        "customerId":"c-789",
+        "creditCardNumber":"4111111111111111"
+      }'
+
+### order invalid - no product in inventory
+
+    curl -X POST http://172.20.9.11:8080/order -H 'Content-Type: application/json'   -d '{
+        "orderId":"2222-3333-4444-5555-6666-7777-8888",
+        "productIds":"PROD-E5",
+        "customerId":"c-789",
+        "creditCardNumber":"7777111111111111"
+      }'
+
+___________
+
+
+### lista dei prodotti:
+
+| product\_id | quantity |
+| ----------- | -------- |
+| PROD-A1     | 100      |
+| PROD-B2     | 50       |
+| PROD-C3     | 75       |
+| PROD-D4     | 200      |
+| PROD-E5     | 0        |
+| PROD-F6     | 120      |
+| PROD-G7     | 90       |
+| PROD-H8     | 60       |
+| PROD-I9     | 40       |
+| PROD-J10    | 300      |
+| PROD-K11    | 25       |
+| PROD-L12    | 15       |
+| PROD-M13    | 180      |
+| PROD-N14    | 220      |
+| PROD-O15    | 5        |
+| PROD-P16    | 80       |
+| PROD-Q17    | 95       |
+| PROD-R18    | 70       |
+| PROD-S19    | 110      |
+| PROD-T20    | 160      |

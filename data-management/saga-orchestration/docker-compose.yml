@@ -1,0 +1,110 @@
+services:
+  conductor:
+    image: conductoross/conductor-standalone:3.15.0
+    container_name: conductor
+    # ports:
+    #   - "8080:8080"   # API
+    #   - "5000:5000"   # UI
+    networks:
+      saga-orchestration-net:
+        ipv4_address: 172.20.9.2
+    volumes:
+      - conductor_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_saga_orchestration
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: db
+    volumes:
+      - ./mysql:/docker-entrypoint-initdb.d
+    networks:
+      saga-orchestration-net:
+        ipv4_address: 172.20.9.3
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -uroot -padmin -e 'SELECT * FROM db.init_complete LIMIT 1;' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    environment:
+      CONDUCTOR_SERVER_URL: http://conductor:8080/api
+      ORDER_WORKER_DOMAIN: ""
+      DB_HOST: mysql_saga_orchestration
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: admin
+      DB_NAME: db
+    depends_on:
+      conductor:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      saga-orchestration-net:
+        ipv4_address: 172.20.9.11
+    restart: unless-stopped
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    environment:
+      CONDUCTOR_SERVER_URL: http://conductor:8080/api
+      ORDER_WORKER_DOMAIN: ""
+      DB_HOST: mysql_saga_orchestration
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: admin
+      DB_NAME: db
+    depends_on:
+      conductor:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      saga-orchestration-net:
+        ipv4_address: 172.20.9.12
+    restart: unless-stopped
+
+  inventory-service:
+    build: ./inventory-service
+    container_name: inventory-service
+    environment:
+      CONDUCTOR_SERVER_URL: http://conductor:8080/api
+      ORDER_WORKER_DOMAIN: ""
+      DB_HOST: mysql_saga_orchestration
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: admin
+      DB_NAME: db
+    depends_on:
+      conductor:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      saga-orchestration-net:
+        ipv4_address: 172.20.9.13
+    restart: unless-stopped
+
+networks:
+  saga-orchestration-net:
+    name: saga-orchestration-net
+    # driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.9.0/24
+volumes:
+  conductor_data:
